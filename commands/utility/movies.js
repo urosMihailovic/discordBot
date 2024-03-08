@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder,  EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
  data: new SlashCommandBuilder()
@@ -17,9 +17,15 @@ module.exports = {
 		await interaction.reply({ content: 'There was an error with the input movies!', ephemeral: true })
 		return;
 	 }
-     const randomString = [...strings][Math.floor(Math.random() * strings.length)];
-     const result = `The winner is - ${randomString} :tada:`
-     console.log(result)
-	 await interaction.reply(result)
+     const result = [...strings][Math.floor(Math.random() * strings.length)];
+	 
+	 const embed = new EmbedBuilder()
+	 .setColor(0x000000)
+	 .setDescription(`*The winner is*\n\n**${result}**\n`)
+	 .setThumbnail('https://i.imgur.com/bLwD7dU.png')
+	 .setFooter({ text: `Enjoy watching!`})
+
+     console.log(`The *winner* is - ${result}`)
+	 await interaction.reply({ embeds: [embed] });
  }
 };
