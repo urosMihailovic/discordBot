@@ -1,7 +1,9 @@
 const fs = require('node:fs');
+const timeDifferenceToString = require('./functions/timeDifferenceToString');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { token } = require('./config.json');
+const techChannelId = '1183676171737645056'
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
@@ -25,6 +27,43 @@ for (const folder of commandFolders) {
 
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
+
+client.on(Events.GuildMemberAdd,  async (member) => {
+	console.log(`${member.user.username} has joined!`);
+	try {
+		const techChannel = await member.guild.channels.fetch(techChannelId);
+		const user = member.user 
+
+		if (techChannel) {
+			const timeAgo = timeDifferenceToString(user.createdAt)
+			const formattedDate = `${user.createdAt.toLocaleDateString('en-US', {
+				weekday: 'short',
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric',
+				hour: 'numeric',
+				minute: 'numeric',
+			  })}`;
+			const description = `Look who it is\n${user}\n\n` +
+								`**Created at**\n${formattedDate}\n`+
+								`***Account age ${timeAgo}***`
+			console.log(description);
+			const embed = new EmbedBuilder()
+			.setColor(0x61de2a)
+			.setAuthor({
+			  name: `${user.username}`,
+			  iconURL: user.avatarURL({ size: 128, format: 'png' }),
+			})
+			.setDescription(description)
+			.setThumbnail(user.avatarURL({ size: 256, format: 'png' }))
+			.setFooter({ text: `20 years in the can` });
+
+			await techChannel.send({embeds: [embed]});
+		}
+    } catch (error) {
+		console.error('Error fetching channel:', error);
+	}
 });
 
 client.on(Events.InteractionCreate, async interaction => {
