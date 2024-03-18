@@ -18,7 +18,8 @@ module.exports = {
 	  .addStringOption(option => // Optional reason
 		option
 		  .setName('reason')
-		  .setDescription('Reason for the timeout (optional).')),
+		  .setDescription('Reason for the timeout (optional).'))
+		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 	async execute(interaction) {
 	  const targetMember = interaction.options.getMember('target');
 	  const durationString = interaction.options.getString('duration');
