@@ -19,9 +19,9 @@ function timeDifferenceToString(pastDate, now = new Date()) {
 
 	// Plural handling and alert postfix
 	const postfix = (difference > 1) ? "s" : "";
-	const exclamationMark = (largestUnit.label === 'hour' || largestUnit.label === 'minute' || largestUnit.label === 'second') ? "🚨" : "";
+	const highlight = (largestUnit.label === 'hour' || largestUnit.label === 'minute' || largestUnit.label === 'second') ? "🚨" : "";
   
-	return `${difference}${postfix} ${largestUnit.label}${exclamationMark}`;
+	return `${difference} ${largestUnit.label}${postfix}${highlight}`;
 }
 
 module.exports = timeDifferenceToString;
