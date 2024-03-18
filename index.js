@@ -34,6 +34,7 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 	try {
 		const techChannel = await member.guild.channels.fetch(techChannelId);
 		const user = member.user 
+		const pfpUrl = user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/mOUw1l1.png"
 
 		if (techChannel) {
 			const timeAgo = timeDifferenceToString(user.createdAt)
@@ -53,10 +54,10 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 			.setColor(0x61de2a)
 			.setAuthor({
 			  name: `${user.username}`,
-			  iconURL: user.avatarURL({ size: 128, format: 'png' }),
+			  iconURL: pfpUrl,
 			})
 			.setDescription(description)
-			.setThumbnail(user.avatarURL({ size: 256, format: 'png' }))
+			.setThumbnail(pfpUrl)
 			.setFooter({ text: `20 years in the can` });
 
 			await techChannel.send({embeds: [embed]});
