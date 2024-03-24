@@ -5,7 +5,7 @@ const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require(
 const { token } = require('./config.json');
 const techChannelId = '1183676171737645056'
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] });
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
@@ -52,6 +52,43 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 			console.log(description);
 			const embed = new EmbedBuilder()
 			.setColor(0x61de2a)
+			.setAuthor({
+			  name: `${user.username}`,
+			  iconURL: pfpUrl,
+			})
+			.setDescription(description)
+			.setThumbnail(pfpUrl)
+			.setFooter({ text: `20 years in the can` });
+
+			await techChannel.send({embeds: [embed]});
+		}
+    } catch (error) {
+		console.error('Error fetching channel:', error);
+	}
+});
+
+client.on(Events.GuildMemberRemove,  async (member) => {
+	console.log(`${member.user.username} left!`);
+	try {
+		const techChannel = await member.guild.channels.fetch(techChannelId);
+		const user = member.user 
+		const pfpUrl = user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/FkTru5t.png"
+
+		if (member.guild.members.cache.size < 2000) {
+			try {
+				await member.guild.members.fetch();
+			} catch (error) {
+				console.error(error);
+				await interaction.reply({ content: 'Couldn\'t fetch members!', ephemeral: true });
+			}
+		}
+
+		if (techChannel) {
+			const description = `${user} left the server!\n` +
+			                    `*New member count is **${member.guild.members.cache.size}***`
+			console.log(description);
+			const embed = new EmbedBuilder()
+			.setColor(0xff3131)
 			.setAuthor({
 			  name: `${user.username}`,
 			  iconURL: pfpUrl,
