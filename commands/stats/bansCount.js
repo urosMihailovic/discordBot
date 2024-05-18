@@ -10,7 +10,7 @@ module.exports = {
       const bans = await interaction.guild.fetchAuditLogs({type: AuditLogEvent.MemberBanAdd, user: interaction.user});
       const count = bans.entries.size
       const plural = count > 1
-      await interaction.reply(`You whacked ${count} member${plural ? "s" : ""}!🍷`);
+      await interaction.reply(`You whacked ${count} member${plural ? "s" : ""} in last three months!🍷`);
     } catch (error) {
       console.error(error);
       await interaction.reply('Failed to retrieve ban information.');

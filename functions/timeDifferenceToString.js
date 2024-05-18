@@ -3,7 +3,7 @@ function timeDifferenceToString(pastDate, now = new Date()) {
   
 	const units = [
 	  { value: 31536000000, label: 'year' }, // Milliseconds in a year (adjusted for leap years)
-	  { value: 2592000000, label: 'month ' }, // Milliseconds in a month (average)
+	  { value: 2592000000, label: 'month' }, // Milliseconds in a month (average)
 	  { value: 604800000, label: 'week' },  // Milliseconds in a week
 	  { value: 86400000, label: 'day' },   // Milliseconds in a day
 	  { value: 3600000, label: 'hour' },   // Milliseconds in an hour
