@@ -12,13 +12,11 @@ module.exports = {
   async execute(interaction) {
     const role = interaction.options.getRole('role');
 
-    if (interaction.guild.members.cache.size < 2000) {
-        try {
-            await interaction.guild.members.fetch();
-        } catch (error) {
-            console.error(error);
-            await interaction.reply({ content: 'Couldn\'t fetch members!', ephemeral: true });
-        }
+    try {
+      await interaction.guild.members.fetch();
+    } catch (error) {
+      console.error(error);
+      await interaction.reply({ content: 'Couldn\'t fetch members!', ephemeral: true });
     }
 
     const roleMembers = interaction.guild.members.cache.filter(member => member.roles.cache.has(role.id));
