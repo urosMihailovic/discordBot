@@ -74,13 +74,11 @@ client.on(Events.GuildMemberRemove,  async (member) => {
 		const user = member.user 
 		const pfpUrl = user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/FkTru5t.png"
 
-		if (member.guild.members.cache.size < 2000) {
-			try {
-				await member.guild.members.fetch();
-			} catch (error) {
-				console.error(error);
-				await interaction.reply({ content: 'Couldn\'t fetch members!', ephemeral: true });
-			}
+		try {
+			await member.guild.members.fetch();
+		} catch (error) {
+			console.error(error);
+			await interaction.reply({ content: 'Couldn\'t fetch members!', ephemeral: true });
 		}
 
 		if (techChannel) {
