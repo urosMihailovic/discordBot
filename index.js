@@ -4,6 +4,7 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { token } = require('./config.json');
 const techChannelId = '1183676171737645056'
+const civilianId = '1241358927472492637'
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] });
 
@@ -33,10 +34,18 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 	console.log(`${member.user.username} has joined!`);
 	try {
 		const techChannel = await member.guild.channels.fetch(techChannelId);
-		const user = member.user 
+		const user = member.user
 		const pfpUrl = user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/mOUw1l1.png"
 
 		if (techChannel) {
+			const role = member.guild.roles.cache.get(civilianId);
+			try {
+				await member.roles.add(role);
+				console.log(`${member.user.tag} has joined and been assigned the ${role.name} role.`);
+			} catch (error) {
+				console.error("Failed to assign role:", error);
+			}
+
 			const timeAgo = timeDifferenceToString(user.createdAt)
 			const formattedDate = `${user.createdAt.toLocaleDateString('en-US', {
 				weekday: 'short',
@@ -59,7 +68,7 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 			.setDescription(description)
 			.setThumbnail(pfpUrl)
 			.setFooter({ text: `20 years in the can` });
-
+			
 			await techChannel.send({embeds: [embed]});
 		}
     } catch (error) {
