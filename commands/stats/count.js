@@ -8,21 +8,25 @@ module.exports = {
       option
         .setName('role')
         .setDescription('The role to count members for.')
-        .setRequired(true)),
+        .setRequired(false)),
   async execute(interaction) {
-    const role = interaction.options.getRole('role');
-
+    const guild = interaction.guild
     try {
-      await interaction.guild.members.fetch();
+      await guild.members.fetch();
     } catch (error) {
       console.error(error);
       await interaction.reply({ content: 'Couldn\'t fetch members!', ephemeral: true });
     }
 
-    const roleMembers = interaction.guild.members.cache.filter(member => member.roles.cache.has(role.id));
-    const memberCount = roleMembers.size;
+    const role = interaction.options.getRole('role')
+    if (role) {
+      const roleMembers = guild.members.cache.filter(member => member.roles.cache.has(role.id));
+      const memberCount = roleMembers.size;
 
-    const memberString = memberCount === 1 ? 'member' : 'members';
-    await interaction.reply(`**${role.name}** has **${memberCount}** ${memberString}.`);
-  },
+      const memberString = memberCount === 1 ? 'member' : 'members';
+      await interaction.reply(`${role} has **${memberCount}** ${memberString}.`);
+    } else {
+      await interaction.reply(`**Server** has **${guild.members.cache.size}** members.`);
+    }
+  }, 
 };
