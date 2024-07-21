@@ -3,7 +3,7 @@ const timeDifferenceToString = require('./functions/timeDifferenceToString');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { token } = require('./config.json');
-const techChannelId = '1183676171737645056'
+const techChannelId = '1265026925886308464'
 const civilianId = '1241358927472492637'
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] });
