@@ -1,5 +1,9 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { GuildBanManager } = require('discord.js');
+
+async function banUserById(guild, userId, reason) {
+    const banManager = guild.bans;
+    await banManager.create(userId, { reason: reason });
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,11 +23,11 @@ module.exports = {
     async execute(interaction) { 
         const targetMember = interaction.options.getMember('target');
         const targetID = interaction.options.getString('id');
-
+        const guild = interaction.guild
+        
         if (targetID) {
             try {
-                const banManager = interaction.guild.bans;
-                await banManager.create(targetID, { reason: ''});
+                banUserById(guild, targetID, '');
                 await interaction.reply({content: `User with ID **${targetID}** has been whacked! `, ephemeral: true });
             } catch (error) {
                 console.error(error);
