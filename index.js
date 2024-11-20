@@ -1,9 +1,10 @@
 const fs = require('node:fs');
 const timeDifferenceToString = require('./functions/timeDifferenceToString');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const { token } = require('./config.json');
 const techChannelId = '1265026925886308464'
+const mainChannelId = '1182267947423645718'
 const civilianId = '1241358927472492637'
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] });
@@ -34,10 +35,11 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 	console.log(`${member.user.username} has joined!`);
 	try {
 		const techChannel = await member.guild.channels.fetch(techChannelId);
+		const mainChannel = await member.guild.channels.fetch(mainChannelId);
 		const user = member.user
 		const pfpUrl = user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/mOUw1l1.png"
 
-		if (techChannel) {
+		if (techChannel && mainChannel) {
 			const role = member.guild.roles.cache.get(civilianId);
 			try {
 				await member.roles.add(role);
@@ -70,6 +72,11 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 			.setFooter({ text: `20 years in the can` });
 			
 			await techChannel.send({embeds: [embed]});
+
+			const filePath = path.join(__dirname, 'images', 'welcome_banner.png'); // Replace with your image path
+    		const attachment = new AttachmentBuilder(filePath);
+			await mainChannel.send({ files: [attachment] });
+			await mainChannel.send({ content: `Welcome to 20 years in the can ${user}!`})
 		}
     } catch (error) {
 		console.error('Error fetching channel:', error);
