@@ -7,7 +7,15 @@ const techChannelId = '1265026925886308464'
 const mainChannelId = '1182267947423645718'
 const civilianId = '1241358927472492637'
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] });
+const client = new Client({ 
+	intents: [
+		GatewayIntentBits.Guilds, 
+		GatewayIntentBits.GuildMembers, 
+		GatewayIntentBits.GuildPresences,
+		GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+	]
+ });
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
@@ -137,6 +145,30 @@ client.on(Events.InteractionCreate, async interaction => {
 			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 		}
 	}
+});
+
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
+    // Check if the timeout status changed
+    if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil) {
+        // Check if the timeout was applied (i.e., user has been timed out)
+        if (newMember.communicationDisabledUntil) {
+            // Send a message to a specific channel reporting the timeout
+            const reportChannel = await client.channels.fetch(techChannelId);
+            if (reportChannel) {
+                reportChannel.send(
+                    `${newMember.user.tag} was timed out in ${newMember.guild.name} until ${newMember.communicationDisabledUntil}.`
+                );
+            }
+        } else {
+            // Member was unmuted (timeout ended)
+            const reportChannel = await client.channels.fetch(REPORT_CHANNEL_ID);
+            if (reportChannel) {
+                reportChannel.send(
+                    `${newMember.user.tag}'s timeout has ended in ${newMember.guild.name}.`
+                );
+            }
+        }
+    }
 });
 
 client.login(token);
