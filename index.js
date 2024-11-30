@@ -161,7 +161,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
             }
         } else {
             // Member was unmuted (timeout ended)
-            const reportChannel = await client.channels.fetch(REPORT_CHANNEL_ID);
+            const reportChannel = await client.channels.fetch(techChannelId);
             if (reportChannel) {
                 reportChannel.send(
                     `${newMember.user.tag}'s timeout has ended in ${newMember.guild.name}.`
