@@ -1,7 +1,7 @@
 const fs = require('node:fs');
-const timeDifferenceToString = require('./functions/timeDifferenceToString');
+const timeFormatting = require('./functions/timeFormatting');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder, AttachmentBuilder, AuditLogEvent } = require('discord.js');
 const { token } = require('./config.json');
 const techChannelId = '1265026925886308464'
 const mainChannelId = '1182267947423645718'
@@ -56,7 +56,7 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 				console.error("Failed to assign role:", error);
 			}
 
-			const timeAgo = timeDifferenceToString(user.createdAt)
+			const timeAgo = timeFormatting.timeDifferenceToString(user.createdAt)
 			const formattedDate = `${user.createdAt.toLocaleDateString('en-US', {
 				weekday: 'short',
 				year: 'numeric',
@@ -147,28 +147,52 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
-client.on('guildMemberUpdate', async (oldMember, newMember) => {
+client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
     // Check if the timeout status changed
-    if (oldMember.communicationDisabledUntil !== newMember.communicationDisabledUntil) {
-        // Check if the timeout was applied (i.e., user has been timed out)
-        if (newMember.communicationDisabledUntil) {
-            // Send a message to a specific channel reporting the timeout
-            const reportChannel = await client.channels.fetch(techChannelId);
-            if (reportChannel) {
-                reportChannel.send(
-                    `${newMember.user.tag} was timed out in ${newMember.guild.name} until ${newMember.communicationDisabledUntil}.`
-                );
-            }
-        } else {
-            // Member was unmuted (timeout ended)
-            const reportChannel = await client.channels.fetch(techChannelId);
-            if (reportChannel) {
-                reportChannel.send(
-                    `${newMember.user.tag}'s timeout has ended in ${newMember.guild.name}.`
-                );
-            }
-        }
-    }
+    const oldTimeout = oldMember.communicationDisabledUntil?.getTime() || 0;
+    const newTimeout = newMember.communicationDisabledUntil?.getTime() || 0;
+    
+    if (oldTimeout === newTimeout) return;
+	// Check if the timeout was applied (i.e., user has been timed out)
+	if (newMember.communicationDisabledUntil) {
+		const fetchedLogs = await newMember.guild.fetchAuditLogs({ limit: 10, type: AuditLogEvent.MemberUpdate });
+		const timeoutLog = fetchedLogs.entries.first();
+
+		if (
+			timeoutLog &&
+			timeoutLog.changes.some(
+				change => change.key === 'communication_disabled_until'
+			)
+		) {
+			const timeoutUntil = new Date(newMember.communicationDisabledUntil);
+			const now = new Date();
+			const durationMs = timeoutUntil - now + 1000;
+			const duration = timeFormatting.msToTimeString(durationMs);
+
+			const pfpUrl = newMember.user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/FkTru5t.png"
+			
+			const embed = new EmbedBuilder()
+			.setColor(0xff3131)
+			.setAuthor({
+				name: `${newMember.user.username}`,
+				iconURL: pfpUrl,
+				})
+			.setDescription(`${newMember.user} was timed out by\n${timeoutLog.executor} for **${duration}**.`)
+			.setThumbnail(pfpUrl)
+			.setFooter({ text: `20 years in the can` });
+		
+			const reportChannel = await client.channels.fetch(techChannelId);
+			if (reportChannel) {
+				reportChannel.send({embeds: [embed]});
+			}
+		}
+	} else {
+		// Member was unmuted (timeout ended)
+		const reportChannel = await client.channels.fetch(techChannelId);
+		if (reportChannel) {
+			reportChannel.send(`${newMember.user}'s timeout has been removed.`);
+		}
+	}
 });
 
 client.login(token);
