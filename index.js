@@ -7,15 +7,16 @@ const techChannelId = '1265026925886308464'
 const mainChannelId = '1182267947423645718'
 const civilianId = '1241358927472492637'
 
-const client = new Client({ 
+const client = new Client({
 	intents: [
-		GatewayIntentBits.Guilds, 
-		GatewayIntentBits.GuildMembers, 
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildModeration,
 		GatewayIntentBits.GuildPresences,
 		GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
+		GatewayIntentBits.MessageContent
 	]
- });
+});
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
@@ -39,7 +40,7 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-client.on(Events.GuildMemberAdd,  async (member) => {
+client.on(Events.GuildMemberAdd, async (member) => {
 	console.log(`${member.user.username} has joined!`);
 	try {
 		const techChannel = await member.guild.channels.fetch(techChannelId);
@@ -64,38 +65,39 @@ client.on(Events.GuildMemberAdd,  async (member) => {
 				day: 'numeric',
 				hour: 'numeric',
 				minute: 'numeric',
-			  })}`;
+			})}`;
 			const description = `Look who it is\n${user}\n\n` +
-								`**Created at**\n${formattedDate}\n`+
-								`***Account age ${timeAgo}***`
+				`**Created at**\n${formattedDate}\n` +
+				`***Account age ${timeAgo}***`
 			console.log(description);
 			const embed = new EmbedBuilder()
-			.setColor(0x61de2a)
-			.setAuthor({
-			  name: `${user.username}`,
-			  iconURL: pfpUrl,
-			})
-			.setDescription(description)
-			.setThumbnail(pfpUrl)
-			.setFooter({ text: `20 years in the can` });
-			
-			await techChannel.send({embeds: [embed]});
+				.setColor(0x61de2a)
+				.setAuthor({
+					name: `${user.username}`,
+					iconURL: pfpUrl,
+				})
+				.setDescription(description)
+				.setThumbnail(pfpUrl)
+				.setFooter({ text: `20 years in the can` });
+
+			await techChannel.send({ embeds: [embed] });
 
 			const filePath = path.join(__dirname, 'images', 'welcome_banner.png'); // Replace with your image path
-    		const attachment = new AttachmentBuilder(filePath);
+			const attachment = new AttachmentBuilder(filePath);
+			
 			await mainChannel.send({ files: [attachment] });
-			await mainChannel.send({ content: `Welcome to 20 years in the can ${user}!`})
+			await mainChannel.send({ content: `Welcome to 20 years in the can ${user}!` })
 		}
-    } catch (error) {
+	} catch (error) {
 		console.error('Error fetching channel:', error);
 	}
 });
 
-client.on(Events.GuildMemberRemove,  async (member) => {
+client.on(Events.GuildMemberRemove, async (member) => {
 	console.log(`${member.user.username} left!`);
 	try {
 		const techChannel = await member.guild.channels.fetch(techChannelId);
-		const user = member.user 
+		const user = member.user
 		const pfpUrl = user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/FkTru5t.png"
 
 		try {
@@ -107,21 +109,21 @@ client.on(Events.GuildMemberRemove,  async (member) => {
 
 		if (techChannel) {
 			const description = `${user} left the server!\n` +
-			                    `*New member count is **${member.guild.members.cache.size}***`
+				`*New member count is **${member.guild.members.cache.size}***`
 			console.log(description);
 			const embed = new EmbedBuilder()
-			.setColor(0xff3131)
-			.setAuthor({
-			  name: `${user.username}`,
-			  iconURL: pfpUrl,
-			})
-			.setDescription(description)
-			.setThumbnail(pfpUrl)
-			.setFooter({ text: `20 years in the can` });
+				.setColor(0xff3131)
+				.setAuthor({
+					name: `${user.username}`,
+					iconURL: pfpUrl,
+				})
+				.setDescription(description)
+				.setThumbnail(pfpUrl)
+				.setFooter({ text: `20 years in the can` });
 
-			await techChannel.send({embeds: [embed]});
+			await techChannel.send({ embeds: [embed] });
 		}
-    } catch (error) {
+	} catch (error) {
 		console.error('Error fetching channel:', error);
 	}
 });
@@ -148,11 +150,11 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
-    // Check if the timeout status changed
-    const oldTimeout = oldMember.communicationDisabledUntil?.getTime() || 0;
-    const newTimeout = newMember.communicationDisabledUntil?.getTime() || 0;
-    
-    if (oldTimeout === newTimeout) return;
+	// Check if the timeout status changed
+	const oldTimeout = oldMember.communicationDisabledUntil?.getTime() || 0;
+	const newTimeout = newMember.communicationDisabledUntil?.getTime() || 0;
+
+	if (oldTimeout === newTimeout) return;
 	// Check if the timeout was applied (i.e., user has been timed out)
 	if (newMember.communicationDisabledUntil) {
 		const fetchedLogs = await newMember.guild.fetchAuditLogs({ limit: 10, type: AuditLogEvent.MemberUpdate });
@@ -170,20 +172,20 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
 			const duration = timeFormatting.msToTimeString(durationMs);
 
 			const pfpUrl = newMember.user.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/FkTru5t.png"
-			
+
 			const embed = new EmbedBuilder()
-			.setColor(0xff3131)
-			.setAuthor({
-				name: `${newMember.user.username}`,
-				iconURL: pfpUrl,
+				.setColor(0xff3131)
+				.setAuthor({
+					name: `${newMember.user.username}`,
+					iconURL: pfpUrl,
 				})
-			.setDescription(`${newMember.user} was timed out by\n${timeoutLog.executor} for **${duration}**.`)
-			.setThumbnail(pfpUrl)
-			.setFooter({ text: `20 years in the can` });
-		
+				.setDescription(`${newMember.user} was timed out by\n${timeoutLog.executor} for **${duration}**.`)
+				.setThumbnail(pfpUrl)
+				.setFooter({ text: `20 years in the can` });
+
 			const reportChannel = await client.channels.fetch(techChannelId);
 			if (reportChannel) {
-				reportChannel.send({embeds: [embed]});
+				reportChannel.send({ embeds: [embed] });
 			}
 		}
 	} else {
@@ -192,6 +194,45 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
 		if (reportChannel) {
 			reportChannel.send(`${newMember.user}'s timeout has been removed.`);
 		}
+	}
+});
+
+client.on(Events.GuildBanAdd, async (ban) => {
+	try {
+		const guild = ban.guild;
+		const bannedUser = ban.user;
+
+		const fetchedLogs = await guild.fetchAuditLogs({ limit: 10, type: AuditLogEvent.MemberUpdate });
+		const banLog = fetchedLogs.entries.first();
+
+		if (!banLog) {
+			console.log(`No audit log found for the ban of ${bannedUser.tag}`);
+			return;
+		}
+
+		const { executor, target } = banLog;
+
+		// Ensure the log entry matches the banned user
+		if (target?.id === bannedUser.id) {
+			const pfpUrl = bannedUser.avatarURL({ size: 256, format: 'png' }) ?? "https://i.imgur.com/FkTru5t.png"
+
+			const embed = new EmbedBuilder()
+			.setColor(0xff3131)
+			.setAuthor({
+				name: `${bannedUser.username}`,
+				iconURL: pfpUrl,
+			})
+			.setDescription(`${bannedUser} was **banned** by\n${executor}!`)
+			.setThumbnail(pfpUrl)
+			.setFooter({ text: `20 years in the can` });
+
+			const reportChannel = await client.channels.fetch(techChannelId);
+			if (reportChannel) {
+				reportChannel.send({ embeds: [embed] });
+			} 
+		}
+	} catch (error) {
+		console.error('Error fetching ban details:', error);
 	}
 });
 
