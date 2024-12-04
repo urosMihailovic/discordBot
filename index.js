@@ -84,7 +84,7 @@ client.on(Events.GuildMemberAdd, async (member) => {
 
 			const filePath = path.join(__dirname, 'images', 'welcome_banner.png'); // Replace with your image path
 			const attachment = new AttachmentBuilder(filePath);
-			
+
 			await mainChannel.send({ files: [attachment] });
 			await mainChannel.send({ content: `Welcome to 20 years in the can ${user}!` })
 		}
@@ -202,7 +202,7 @@ client.on(Events.GuildBanAdd, async (ban) => {
 		const guild = ban.guild;
 		const bannedUser = ban.user;
 
-		const fetchedLogs = await guild.fetchAuditLogs({ limit: 10, type: AuditLogEvent.MemberUpdate });
+		const fetchedLogs = await guild.fetchAuditLogs({ limit: 10, type: AuditLogEvent.MemberBanAdd });
 		const banLog = fetchedLogs.entries.first();
 
 		if (!banLog) {
